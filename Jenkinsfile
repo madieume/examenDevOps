@@ -43,7 +43,7 @@ pipeline {
             echo ' Pipeline exécuté avec succès'
         }
         failure {
-            echo ' Le pipeline a échoué'
+            echo ' pipeline échoué'
         }
     }
 }
