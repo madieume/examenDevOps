@@ -17,7 +17,7 @@ pipeline {
 
         stage('Build & Tests') {
             steps {
-                sh 'mvn clean install'
+                bat 'mvn clean install'
             }
         }
 
@@ -29,7 +29,7 @@ pipeline {
 
         stage('Déploiement sur Render') {
             steps {
-                sh '''
+                bat '''
                 curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
                 -H "Authorization: Bearer ${RENDER_API_KEY}" \
                 -H "Content-Type: application/json"
