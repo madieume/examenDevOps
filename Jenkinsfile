@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GIT_REPO = 'https://github.com/babaly/221-java-project.git'
+        GIT_REPO = 'https://https://github.com/madieume/examenDevOps/tree/madieume'
         BRANCH = 'main'
         RENDER_API_KEY = credentials('render-api-key') // clé API stockée dans Jenkins
         RENDER_SERVICE_ID = 'ton-service-id-render'
