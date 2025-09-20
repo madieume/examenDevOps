@@ -2,48 +2,54 @@ pipeline {
     agent any
 
     environment {
-        GIT_REPO = 'https://github.com/babaly/221-java-project.git'
-        BRANCH = 'main'
-        RENDER_API_KEY = credentials('render-api-key') // clé API stockée dans Jenkins
-        RENDER_SERVICE_ID = 'ton-service-id-render'
+        DOCKERHUB_CREDENTIALS = credentials('dockerhub-cred') // ID de tes credentials DockerHub
+        IMAGE_NAME = "madieume/devopexam"
+        APP_PORT = 8083
+        RENDER_SERVICE_ID = "srv-d37a0qggjchc73c3nq90"
+        RENDER_API_KEY = credentials('render-api-key') // ID de credentials Render
     }
 
     stages {
-        stage('Cloner le projet') {
+
+        stage('Checkout') {
             steps {
-                git branch: "${BRANCH}", url: "${GIT_REPO}"
+                git branch: 'main', url: 'https://github.com/madieume/examenDevOps'
             }
         }
 
-        stage('Build & Tests') {
+        stage('Build Maven') {
             steps {
-                sh 'mvn clean install'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage('Archiver Artefact') {
+        stage('Build Docker Image') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                script {
+                    docker.build("${IMAGE_NAME}:latest")
+                }
             }
         }
 
-        stage('Déploiement sur Render') {
+        stage('Push Docker Image') {
             steps {
-                sh '''
-                curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
-                -H "Authorization: Bearer ${RENDER_API_KEY}" \
-                -H "Content-Type: application/json"
-                '''
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKERHUB_CREDENTIALS') {
+                        docker.image("${IMAGE_NAME}:latest").push()
+                    }
+                }
             }
         }
-    }
 
-    post {
-        success {
-            echo ' Pipeline exécuté avec succès'
-        }
-        failure {
-            echo ' pipeline échoué'
+        stage('Deploy to Render') {
+            steps {
+                script {
+                    sh """
+                    curl -X POST "https://api.render.com/deploy/srv-${RENDER_SERVICE_ID}/manual" \\
+                    -H "Authorization: Bearer ${RENDER_API_KEY}"
+                    """
+                }
+            }
         }
     }
 }
