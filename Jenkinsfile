@@ -13,7 +13,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/madieume/examenDevOps'
+                git branch: 'main', url: 'https://github.com/madieume/examenFinaleDevOps'
             }
         }
 
